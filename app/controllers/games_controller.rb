@@ -1,3 +1,4 @@
+require_relative '../utils/utilities.rb'
 class GamesController < ApplicationController
   before_action :set_game, only: [:show, :edit, :update, :destroy]
 
@@ -5,12 +6,21 @@ class GamesController < ApplicationController
   # GET /games.json
   def index
     @games = Game.all
-    # render json: GameBlueprint.render(@games), status: :ok
+    if @games.blank?
+      
+    else
+      render json: GameBlueprint.render(@games), status: :ok
+    end
   end
 
   # GET /games/1
   # GET /games/1.json
   def show
+    if @game.nil?
+      
+    else
+      render json: GameBlueprint.render(@game), status: :ok
+    end
   end
 
   # GET /games/new
@@ -22,11 +32,13 @@ class GamesController < ApplicationController
   def edit
   end
 
-  # POST /games
+  # POST /gamesPOST
   # POST /games.json
   def create
+    utilities = Utilities.new
     @game = Game.new(game_params)
       if @game.save
+        utilities.increase_win_loss(@game)
         redirect_to games_path
       else
         render "new"
@@ -36,21 +48,16 @@ class GamesController < ApplicationController
   # PATCH/PUT /games/1
   # PATCH/PUT /games/1.json
   def update
-    respond_to do |format|
-      if @game.update(game_params)
-        format.html { redirect_to @game, notice: 'Game was successfully updated.' }
-        format.json { render :show, status: :ok, location: @game }
-      else
-        format.html { render :edit }
-        format.json { render json: @game.errors, status: :unprocessable_entity }
-      end
-    end
+    @game.update(game_params)
   end
 
   # DELETE /games/1
   # DELETE /games/1.json
   def destroy
+    utilities = Utilities.new
+    utilities.decrease_win_loss(@game)
     @game.destroy
+      
   end
 
   private
